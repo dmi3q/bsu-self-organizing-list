@@ -15,8 +15,7 @@ class SelfOrganizedList {
     insert(data) {
         let node = new Node(data);
         if (this.head == null) {
-            this.tail = node;
-            this.head = this.tail;
+            this.head = this.tail = node;
         }
         else {
             this.tail.next = node;
@@ -28,22 +27,27 @@ class SelfOrganizedList {
     size() {
         var count = 0;
         var iterator = this.head;
-        while (iterator != null) {
+        while (iterator) {
             ++count;
             iterator = iterator.next;
         }
         return count;
     }
 
-    at(index) {
-        if (!this.size() || index > this.size()) return null;
+    nodeAt(index) {
+        if (!this.size() || index >= this.size()) return null;
         var i = 0;
         var iterator = this.head;
         while (i != index) {
             iterator = iterator.next;
             ++i;
         }
-        return iterator.data;
+        return iterator;
+    }
+
+    at(index) {
+        if (!this.nodeAt(index)) return null;
+        else return this.nodeAt(index).data;
     }
 
     findNode(data) {
@@ -58,56 +62,34 @@ class SelfOrganizedList {
 
     toArray() {
         var array = [];
-        var iterator = this.head;
-        while (iterator != null) {
+        for (var iterator = this.head; iterator; iterator = iterator.next)
             array.push(iterator.data);
-            iterator = iterator.next;
-        }
         return array;
     }
 
     removeAt(index) {
-        var currentNode = this.findNode(this.at(index));
-        if (this.size() == 1) {
-            this.head = null;
-            this.tail = null;
-            return;
-        }
+        var currentNode = this.nodeAt(index);
         if (currentNode == this.head) this.head = currentNode.next;
+        else currentNode.prev.next = currentNode.next;
         if (currentNode == this.tail) this.tail = currentNode.prev;
-        if (index < this.size() - 1) currentNode.next.prev = currentNode.prev;
-        if (index > 0) currentNode.prev.next = currentNode.next;
-        currentNode.next = null;
-        currentNode.prev = null;
-        currentNode.data = null;
+        else currentNode.next.prev = currentNode.prev;
+        currentNode.next = currentNode.prev = currentNode.data = null;
     }
 
     moveToFront(node) {
-        var currentNode = this.findNode(node.data);
-        if (this.size() < 2 || currentNode == this.head) return;
-        if (this.size() == 2) {
-            currentNode.next = currentNode.prev;
-            currentNode.next.prev = currentNode;
-            currentNode.next.next = null;
-            currentNode.prev = null;
-            currentNode.next = this.tail;
-            currentNode = this.head;
+        if (this.size() < 2 || node == this.head) return;
+        if (node == this.tail) {
+            this.tail = node.prev;
+            this.tail.next = null;
         }
-        if (currentNode != this.tail) {
-            currentNode.next.prev = currentNode.prev;
-            currentNode.prev.next = currentNode.next;
-            currentNode.next = this.head;
-            currentNode.prev = null;
-            this.head = currentNode;
+        else {
+            node.next.prev = node.prev;
+            node.prev.next = node.next;
         }
-        if (currentNode == this.tail) {
-            this.tail = currentNode.prev;
-            currentNode.next = this.head;
-            currentNode.prev.next = null;
-            currentNode.prev = null;
-            this.head.prev = currentNode;
-            this.head = currentNode;
-        }
+        this.head.prev = node;
+        node.next = this.head;
+        node.prev = null;
+        this.head = node;
     }
 
     reorganize(data) {
@@ -116,7 +98,6 @@ class SelfOrganizedList {
         this.moveToFront(currentNode);
         return true;
     }
-
 }
 
 module.exports = {
