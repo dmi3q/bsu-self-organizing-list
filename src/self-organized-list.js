@@ -35,7 +35,7 @@ class SelfOrganizedList {
     }
 
     nodeAt(index) {
-        if (!this.size() || index >= this.size()) return null;
+        if (!this.size() || index < 0 || index >= this.size()) return null;
         var i = 0;
         var iterator = this.head;
         while (i != index) {
